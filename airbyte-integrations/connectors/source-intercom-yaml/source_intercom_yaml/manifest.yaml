@@ -1,0 +1,112 @@
+version: "0.1.0"
+
+definitions:
+  ### SCHEMA LOADERS
+  schema_loader:
+    type: JsonSchema
+    file_path: "./source_intercom_yaml/schemas/{{ options['name'] }}.json"
+
+  ### REQUESTERS
+  base_requester:
+    type: HttpRequester
+    url_base: "https://api.intercom.io/"
+    http_method: "GET"
+    # TODO: ERRORS SHOULD BE HANDLED AS WELL!
+    authenticator:
+      type: BearerAuthenticator
+      api_token: "{{ config['access_token'] }}"        
+    request_options_provider:
+      request_headers:
+        Intercom-Version: '2.5'
+
+  ### SELECTORS
+  base_selector:
+    extractor:
+      type: DpathExtractor
+      field_pointer: ["{{ options.get('data_field', 'data')}}"] 
+  
+  ### RETRIEVERS
+  base_retriever:
+    record_selector:
+      $ref: "*ref(definitions.base_selector)"
+    paginator:
+      type: NoPagination
+    requester:
+      $ref: "*ref(definitions.base_requester)"
+
+  ### STREAMS
+  base_stream:
+    $options:
+      page_size: 150
+    retriever:
+      $ref: "*ref(definitions.base_retriever)"
+    schema_loader:
+      $ref: "*ref(definitions.schema_loader)"
+
+  base_incremental_stream:
+    $ref: "*ref(definitions.base_stream)"
+    stream_cursor_field: "updated_at"
+    checkpoint_interval: 150
+    retriever:
+      $ref: "*ref(definitions.base_retriever)"
+      stream_slicer:
+        type: "DatetimeStreamSlicer"
+        cursor_field: "updated_at"
+        start_datetime:
+          datetime: “{{ config['start_date'] }}”
+          datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+        end_datetime:
+          datetime: “{{ now_utc() }}”
+          datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+        step: "P100Y"
+        datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+        cursor_granularity: "PT0.000001S"
+      # record_selector:
+      #   $ref: "*ref(definitions.base_selector)"
+        # record_filter:
+        #   type: RecordFilter
+        #   condition: "{{ not self.state or record[stream_cursor_field] >= self.state.get(stream_cursor_field, start_date) }}"
+    
+      
+  # Segments
+  segments_stream:
+    $ref: "*ref(definitions.base_incremental_stream)"
+    $options:
+      name: "segments"
+      primary_key: "id"
+      path: "segments"
+      data_field: "segments"
+
+  # Admins
+  admins_stream:
+    $ref: "*ref(definitions.base_stream)"
+    $options:
+      name: "admins"
+      primary_key: "id"
+      path: "admins"
+      data_field: "admins"
+  # Tags
+  tags_stream:
+    $ref: "*ref(definitions.base_stream)"
+    $options:
+      name: "tags"
+      primary_key: "name"
+      path: "tags"
+  # Teams
+  teams_stream:
+    $ref: "*ref(definitions.base_stream)"
+    $options:
+      name: "teams"
+      primary_key: "name"
+      path: "teams"
+      data_field: "teams"
+
+streams:
+  - "*ref(definitions.segments_stream)"
+  # - "*ref(definitions.admins_stream)"
+  # - "*ref(definitions.tags_stream)"
+  # - "*ref(definitions.teams_stream)"
+
+check:
+  stream_names: 
+    - "tags"
