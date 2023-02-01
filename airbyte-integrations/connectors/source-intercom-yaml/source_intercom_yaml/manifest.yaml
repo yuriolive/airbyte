@@ -46,27 +46,25 @@ definitions:
   base_incremental_stream:
     $ref: "*ref(definitions.base_stream)"
     stream_cursor_field: "updated_at"
-    checkpoint_interval: 150
     retriever:
       $ref: "*ref(definitions.base_retriever)"
+      record_selector:
+        $ref: "*ref(definitions.base_selector)"
+        record_filter:
+          type: RecordFilter
+          condition: "{{ record[options.get('stream_cursor_field')] >= 1589548236 }}"  # works but state value is needed!
       stream_slicer:
         type: "DatetimeStreamSlicer"
         cursor_field: "updated_at"
         start_datetime:
-          datetime: “{{ config['start_date'] }}”
-          datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+          datetime: "{{ format_datetime(config['start_date'], '%s') }}"
+          datetime_format: '%s'
         end_datetime:
-          datetime: “{{ now_utc() }}”
-          datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+          datetime: "{{ now_utc().strftime('%s') }}"
+          datetime_format: '%s'
         step: "P100Y"
-        datetime_format: '%Y-%m-%dT%H:%M:%SZ'
+        datetime_format: '%s'
         cursor_granularity: "PT0.000001S"
-      # record_selector:
-      #   $ref: "*ref(definitions.base_selector)"
-        # record_filter:
-        #   type: RecordFilter
-        #   condition: "{{ not self.state or record[stream_cursor_field] >= self.state.get(stream_cursor_field, start_date) }}"
-    
       
   # Segments
   segments_stream:
@@ -76,6 +74,7 @@ definitions:
       primary_key: "id"
       path: "segments"
       data_field: "segments"
+      stream_cursor_field: "updated_at"
 
   # Admins
   admins_stream:
