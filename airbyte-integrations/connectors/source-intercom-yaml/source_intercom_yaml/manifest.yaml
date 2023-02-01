@@ -52,7 +52,7 @@ definitions:
         $ref: "*ref(definitions.base_selector)"
         record_filter:
           type: RecordFilter
-          condition: "{{ record[options.get('stream_cursor_field')] >= 1589548236 }}"  # works but state value is needed!
+          condition: "{{ not stream_state or record[options.get('stream_cursor_field')] >= stream_state.get(options.get('stream_cursor_field')) }}"  # works but state value is needed!
       stream_slicer:
         type: "DatetimeStreamSlicer"
         cursor_field: "updated_at"
@@ -66,16 +66,8 @@ definitions:
         datetime_format: '%s'
         cursor_granularity: "PT0.000001S"
       
-  # Segments
-  segments_stream:
-    $ref: "*ref(definitions.base_incremental_stream)"
-    $options:
-      name: "segments"
-      primary_key: "id"
-      path: "segments"
-      data_field: "segments"
-      stream_cursor_field: "updated_at"
-
+  
+  ## Full-Refresh
   # Admins
   admins_stream:
     $ref: "*ref(definitions.base_stream)"
@@ -99,12 +91,23 @@ definitions:
       primary_key: "name"
       path: "teams"
       data_field: "teams"
+  
+  ### Incremental
+  # Segments
+  segments_stream:
+    $ref: "*ref(definitions.base_incremental_stream)"
+    $options:
+      name: "segments"
+      primary_key: "id"
+      path: "segments"
+      data_field: "segments"
+      stream_cursor_field: "updated_at"
 
 streams:
+  - "*ref(definitions.admins_stream)"
+  - "*ref(definitions.tags_stream)"
+  - "*ref(definitions.teams_stream)"
   - "*ref(definitions.segments_stream)"
-  # - "*ref(definitions.admins_stream)"
-  # - "*ref(definitions.tags_stream)"
-  # - "*ref(definitions.teams_stream)"
 
 check:
   stream_names: 
