@@ -50,9 +50,11 @@ definitions:
       $ref: "*ref(definitions.base_retriever)"
       record_selector:
         $ref: "*ref(definitions.base_selector)"
+        # filtering the records by `cursor_field` when server-side filtering is not available
+        # but `cursor_field` (ex: updated_at, etc) is present inside the data
         record_filter:
           type: RecordFilter
-          condition: "{{ not stream_state or record[options.get('stream_cursor_field')] >= stream_state.get(options.get('stream_cursor_field')) }}"  # works but state value is needed!
+          condition: "{{ not stream_state or record[options.get('stream_cursor_field')] >= stream_state.get(options.get('stream_cursor_field')) }}"
       stream_slicer:
         type: "DatetimeStreamSlicer"
         cursor_field: "updated_at"
