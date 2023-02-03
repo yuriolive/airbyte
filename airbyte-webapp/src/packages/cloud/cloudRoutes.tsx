@@ -22,7 +22,7 @@ import { useGetCloudWorkspace } from "./services/workspaces/CloudWorkspacesServi
 import { VerifyEmailAction } from "./views/FirebaseActionRoute";
 import { RoutePaths, DestinationPaths } from "../../pages/routePaths";
 
-const MainView = React.lazy(() => import("packages/cloud/views/layout/MainView"));
+const CloudMainView = React.lazy(() => import("packages/cloud/views/layout/CloudMainView"));
 const WorkspacesPage = React.lazy(() => import("packages/cloud/views/workspaces"));
 const Auth = React.lazy(() => import("packages/cloud/views/auth"));
 const CreditsPage = React.lazy(() => import("packages/cloud/views/credits"));
@@ -88,7 +88,7 @@ const MainRoutes: React.FC = () => {
   );
 };
 
-const MainViewRoutes = () => {
+const CloudMainViewRoutes = () => {
   useApiHealthPoll();
   const query = useQuery<{ from: string }>();
 
@@ -103,9 +103,9 @@ const MainViewRoutes = () => {
       <Route
         path={`${RoutePaths.Workspaces}/:workspaceId/*`}
         element={
-          <MainView>
+          <CloudMainView>
             <MainRoutes />
-          </MainView>
+          </CloudMainView>
         }
       />
       <Route path="*" element={<DefaultView />} />
@@ -158,7 +158,7 @@ export const Routing: React.FC = () => {
           {/* Show the login screen if the user is not logged in */}
           {!user && <Auth />}
           {/* Allow all regular routes if the user is logged in */}
-          {user && <MainViewRoutes />}
+          {user && <CloudMainViewRoutes />}
         </Suspense>
       </LDExperimentServiceProvider>
     </WorkspaceServiceProvider>
