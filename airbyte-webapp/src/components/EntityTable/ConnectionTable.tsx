@@ -117,7 +117,7 @@ const ConnectionTable: React.FC<ConnectionTableProps> = ({ data, entity, onClick
         cell: (props) => (
           <ConnectorNameCell
             value={props.cell.getValue()}
-            icon={props.row.original.entityIcon}
+            icon={props.row.original.connectorIcon}
             enabled={props.row.original.enabled}
           />
         ),
@@ -139,7 +139,7 @@ const ConnectionTable: React.FC<ConnectionTableProps> = ({ data, entity, onClick
         cell: (props) => (
           <ConnectorNameCell
             value={props.cell.getValue()}
-            icon={props.row.original.connectorIcon}
+            icon={props.row.original.entityIcon}
             enabled={props.row.original.enabled}
           />
         ),
