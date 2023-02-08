@@ -2,7 +2,7 @@
   {
     "type": "STREAM",
     "stream": {
-      "stream_state": { "updated_at": 7626086649 },
+      "stream_state": { "updated_at": 1675710187 },
       "stream_descriptor": { "name": "companies" }
     }
   },
@@ -43,7 +43,7 @@
   {
     "type": "STREAM",
     "stream": {
-      "stream_state": { "updated_at": 7626086649 },
+      "stream_state": { "updated_at": 1532857690 },
       "stream_descriptor": { "name": "segments" }
     }
   }
